@@ -9,6 +9,7 @@ const callSchema = new mongoose.Schema({
     from: String,
     startTime: Date,
     endTime: Date,
+    Date:Date,
     duration: String,
   });
 

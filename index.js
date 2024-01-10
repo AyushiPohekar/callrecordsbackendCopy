@@ -19,6 +19,7 @@ app.use(express.json());
  const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 console.log(accountSid)
+console.log(authToken)
    const client = twilio(accountSid,authToken);
 
 
@@ -145,10 +146,10 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
       direction: call.direction,
       to: call.to,
       from: call.from,
-      startTime: call.date_created,
-      endTime: call.end_time,
+      startTime: call.startTime,
+      endTime: call.endTime,
       duration: call.duration,
-      // Add more details as needed
+      Date:call.dateCreated
     }));
 
     const newCalls = await Promise.all(
@@ -207,6 +208,7 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
               <td>${call.startTime}</td>
               <td>${call.endTime}</td>
               <td>${call.duration}</td>
+              <td>${call.Date}</td>
             </tr>
           `).join('')}
         </table>
@@ -216,7 +218,8 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
 
     
 
-    res.send(htmlTable);
+    //res.send(htmlTable);
+    res.json(calls)
   } catch (error) {
     console.error("Error fetching call details:", error.message);
     res
