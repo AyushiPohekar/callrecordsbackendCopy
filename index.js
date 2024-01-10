@@ -197,6 +197,7 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
             <th>Start Time</th>
             <th>End Time</th>
             <th>Duration</th>
+            <th>Date</th>
           </tr>
           ${newCalls.map(call => `
             <tr>
