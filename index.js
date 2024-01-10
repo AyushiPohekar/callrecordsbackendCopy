@@ -126,8 +126,18 @@ console.log(authToken)
 //     );
 // });
 
-// //get all calls of particular number
-
+function formatDateTime(date) {
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  };
+  return new Date(date).toLocaleString("en-US", options);
+}
 app.get("/listCalls/:phoneNumber", async (req, res) => {
   try {
     const phoneNumber = req.params.phoneNumber;
@@ -146,10 +156,10 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
       direction: call.direction,
       to: call.to,
       from: call.from,
-      startTime: call.startTime,
-      endTime: call.endTime,
+      startTime: formatDateTime(new Date(call.startTime)),
+      endTime: formatDateTime(new Date(call.endTime)),
       duration: call.duration,
-      Date:call.dateCreated
+      Date:formatDateTime(new Date(call.dateCreated))
     }));
 
     const newCalls = await Promise.all(
@@ -219,8 +229,8 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
 
     
 
-    res.send(htmlTable);
-    //res.json(calls)
+    res.json(newCalls);
+    
   } catch (error) {
     console.error("Error fetching call details:", error.message);
     res
