@@ -218,8 +218,8 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
 
     
 
-    //res.send(htmlTable);
-    res.json(calls)
+    res.send(htmlTable);
+    //res.json(calls)
   } catch (error) {
     console.error("Error fetching call details:", error.message);
     res
