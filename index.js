@@ -4,9 +4,9 @@ const twilio = require("twilio");
 const cors = require("cors");
 const Connection = require("./db");
 const Call = require("./CallSchema");
-const dotenv=require("dotenv")
- dotenv.config();
-console.log("hi")
+const dotenv = require("dotenv");
+dotenv.config();
+console.log("hi");
 // console.log('Environment variables loaded:', process.env);
 Connection();
 const app = express();
@@ -14,14 +14,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
- const accountSid = process.env.TWILIO_ACCOUNT_SID;
- const authToken = process.env.TWILIO_AUTH_TOKEN;
-
-console.log(accountSid)
-console.log(authToken)
-   const client = twilio(accountSid,authToken);
-
+console.log(accountSid);
+console.log(authToken);
+const client = twilio(accountSid, authToken);
 
 // // app.get("/listRecordings", (req, res) => {
 // //   client.recordings
@@ -126,6 +124,7 @@ console.log(authToken)
 //     );
 // });
 
+// //get all calls of particular number
 function formatDateTime(date) {
   const options = {
     year: "numeric",
@@ -134,9 +133,16 @@ function formatDateTime(date) {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    timeZoneName: "short",
+    timeZone: "UTC", // Convert to UTC time
   };
-  return new Date(date).toLocaleString("en-US", options);
+
+  const originalDate = new Date(date)
+    .toLocaleString("en-US", options)
+    .replace(/,/g, "");
+  let parsedDate = new Date(originalDate);
+  let formattedDate = parsedDate.toISOString().split("T")[0];
+
+  return formattedDate;
 }
 app.get("/listCalls/:phoneNumber", async (req, res) => {
   try {
@@ -159,7 +165,7 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
       startTime: formatDateTime(new Date(call.startTime)),
       endTime: formatDateTime(new Date(call.endTime)),
       duration: call.duration,
-      Date:formatDateTime(new Date(call.dateCreated))
+      Date: formatDateTime(new Date(call.startTime)),
     }));
 
     const newCalls = await Promise.all(
@@ -173,7 +179,7 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
         return existingCall;
       })
     );
-   
+
     const htmlTable = `
     <html>
       <head>
@@ -209,7 +215,9 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
             <th>Duration</th>
             <th>Date</th>
           </tr>
-          ${newCalls.map(call => `
+          ${newCalls
+            .map(
+              (call) => `
             <tr>
               <td>${call.sid}</td>
               <td>${call.status}</td>
@@ -221,16 +229,76 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
               <td>${call.duration}</td>
               <td>${call.Date}</td>
             </tr>
-          `).join('')}
+          `
+            )
+            .join("")}
         </table>
       </body>
     </html>
   `;
 
-    
-
     res.json(newCalls);
+  } catch (error) {
+    console.error("Error fetching call details:", error.message);
+    res
+      .status(500)
+      .json({ error: `Error fetching call details: ${error.message}` });
+  }
+});
+
+app.get("/listCallsByDate/:phoneNumber", async (req, res) => {
+  try {
+    const phoneNumber = req.params.phoneNumber;
+
+    // Fetch calls made to or from the specified phone number
+    const calls = await client.calls.list({
+      to: phoneNumber,
+      limit: 20,
+    });
+
+    // Extract relevant details and format the response
+    const callDetails = calls.map((call) => ({
+      sid: call.sid,
+      status: call.status,
+      direction: call.direction,
+      to: call.to,
+      from: call.from,
+      startTime: formatDateTime(new Date(call.startTime)),
+      endTime: formatDateTime(new Date(call.endTime)),
+      duration: call.duration,
+      datecreated: formatDateTime(call.startTime),
+    }));
+
+    const newCalls = await Promise.all(
+      callDetails.map(async (detail) => {
+        const existingCall = await Call.findOne({ sid: detail.sid });
+
+        if (!existingCall) {
+          return Call.create(detail);
+        }
+
+        return existingCall;
+      })
+    );
+
+    const startDate = req.query.start_date
+      ? new Date(req.query.start_date)
+      : null;
+
+    const endDate = req.query.end_date ? new Date(req.query.end_date) : null;
+
+  
+    const filteredCalls = newCalls.filter((call) => {
     
+      const callDate = call.Date;
+
+      return (
+        (!startDate || callDate >= startDate) &&
+        (!endDate || callDate <= endDate)
+      );
+    });
+
+    res.send(filteredCalls);
   } catch (error) {
     console.error("Error fetching call details:", error.message);
     res
@@ -242,6 +310,5 @@ app.get("/listCalls/:phoneNumber", async (req, res) => {
 const PORT = 5000;
 
 app.listen(PORT, () => {
-
   console.log(`Server is running on port ${PORT}`);
 });
