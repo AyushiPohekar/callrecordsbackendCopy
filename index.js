@@ -21,108 +21,7 @@ console.log(accountSid);
 console.log(authToken);
 const client = twilio(accountSid, authToken);
 
-// // app.get("/listRecordings", (req, res) => {
-// //   client.recordings
-// //     .list({ limit: 20 })
-// //     .then((recordings) => {
-// //       //recordings.forEach(r => console.log(r.sid));
-// //       //res.send(recordings);
-// //       // const recordingsWithDurations = recordings.map(r => ({
-// //       //    sid: r.sid,
-// //       //    duration: r.duration
-// //       //  }));
-// //       const responseObj = {
-// //         count: recordings.length,
-// //         recordings: recordings,
-// //       };
-// //       res.json(responseObj);
 
-// //       //  res.json(recordingsWithDurations);
-// //     })
-// //     .catch((error) => {
-// //       console.error(error);
-// //       res.status(500).send(error);
-// //     });
-// // });
-
-// // app.get("/listAlerts", (req, res) => {
-// //   client.monitor.v1.alerts
-// //     .list({ limit: 20 })
-// //     .then((alerts) => {
-// //       alerts.forEach((a) => console.log(a.sid));
-// //       res.send("Alerts listed successfully.");
-// //     })
-// //     .catch((error) => {
-// //       console.log(error);
-// //       res.status(500).send(error);
-// //     });
-// // });
-
-// // app.get("/getCallSid/:phoneNumber", (req, res) => {
-// //   const phoneNumber = req.params.phoneNumber;
-
-// //   client.calls
-// //     .list({
-// //       to: phoneNumber,
-// //       limit: 1,
-// //     })
-// //     .then((calls) => {
-// //       if (calls.length > 0) {
-// //         const callSid = calls[0].sid;
-
-// //         // Use the obtained callSid to fetch recordings
-// //         client.recordings
-// //           .list({ callSid, limit: 20 })
-// //           .then((recordings) => {
-// //             recordings.forEach((r) => console.log(r.sid));
-// //             res.json({ phoneNumber, callSid, recordings });
-// //             //res.json(recordings)
-// //           })
-// //           .catch((error) =>
-// //             res
-// //               .status(500)
-// //               .json({ error: `Error fetching recordings: ${error.message}` })
-// //           );
-// //       } else {
-// //         res.json({ phoneNumber, callSid: null, recordings: [] });
-// //       }
-// //     })
-// //     .catch((error) =>
-// //       res.status(500).json({ error: `Error fetching calls: ${error.message}` })
-// //     );
-// // });
-
-// //details of particular call
-// app.get("/getCallDetails/:phoneNumber", (req, res) => {
-//   const phoneNumber = req.params.phoneNumber;
-
-//   client.calls
-//     .list({
-//       to: phoneNumber,
-//       limit: 1,
-//     })
-//     .then((calls) => {
-//       if (calls.length > 0) {
-//         const callSid = calls[0].sid;
-
-//         client
-//           .calls(callSid)
-//           .fetch()
-//           .then((call) => res.json(call))
-//           .catch(
-//             (error) =>
-//               res.status(500).json({
-//                 error: `Error fetching call details: ${error.message}`,
-//               }) // Corrected the error message
-//           );
-//       } else {
-//         res.json([]);
-//       }
-//     })
-//     .catch((error) =>
-//       res.status(500).json({ error: `Error fetching calls: ${error.message}` })
-//     );
-// });
 
 // //get all calls of particular number
 function formatDateTime(date) {
@@ -250,13 +149,13 @@ app.get("/listCallsByDate/:phoneNumber", async (req, res) => {
   try {
     const phoneNumber = req.params.phoneNumber;
 
-    // Fetch calls made to or from the specified phone number
+  
     const calls = await client.calls.list({
       to: phoneNumber,
       limit: 20,
     });
 
-    // Extract relevant details and format the response
+  
     const callDetails = calls.map((call) => ({
       sid: call.sid,
       status: call.status,
