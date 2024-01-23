@@ -21,8 +21,6 @@ console.log(accountSid);
 console.log(authToken);
 const client = twilio(accountSid, authToken);
 
-
-
 // //get all calls of particular number
 function formatDateTime(date) {
   const options = {
@@ -149,19 +147,15 @@ app.get("/listCallsByDate/:phoneNumber", async (req, res) => {
   try {
     const phoneNumber = req.params.phoneNumber;
 
-  
-    const calls = await client.calls.list({
-      to: phoneNumber,
-      limit: 20,
-    });
+    const calls = await client.calls.list({});
 
-  
     const callDetails = calls.map((call) => ({
       sid: call.sid,
       status: call.status,
       direction: call.direction,
       to: call.to,
       from: call.from,
+
       startTime: formatDateTime(new Date(call.startTime)),
       endTime: formatDateTime(new Date(call.endTime)),
       duration: call.duration,
@@ -186,9 +180,7 @@ app.get("/listCallsByDate/:phoneNumber", async (req, res) => {
 
     const endDate = req.query.end_date ? new Date(req.query.end_date) : null;
 
-  
     const filteredCalls = newCalls.filter((call) => {
-    
       const callDate = call.Date;
 
       return (
@@ -198,6 +190,7 @@ app.get("/listCallsByDate/:phoneNumber", async (req, res) => {
     });
 
     res.send(filteredCalls);
+    console.log(filteredCalls.length);
   } catch (error) {
     console.error("Error fetching call details:", error.message);
     res
@@ -205,6 +198,8 @@ app.get("/listCallsByDate/:phoneNumber", async (req, res) => {
       .json({ error: `Error fetching call details: ${error.message}` });
   }
 });
+
+
 
 const PORT = 5000;
 
