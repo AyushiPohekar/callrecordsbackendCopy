@@ -20,7 +20,7 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 console.log(accountSid);
 console.log(authToken);
 const client = twilio(accountSid, authToken);
-
+console.log(client)
 // //get all calls of particular number
 function formatDateTime(date) {
   const options = {
