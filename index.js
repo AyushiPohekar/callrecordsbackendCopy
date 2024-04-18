@@ -267,6 +267,9 @@ app.get("/listCallsforclient", async (req, res) => {
 
 const PORT = 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Set timeout to 2 minutes (120000 milliseconds)
+server.timeout = 120000;
